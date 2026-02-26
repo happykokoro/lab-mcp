@@ -1,75 +1,79 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { PlatformClient } from "../client/platform.js";
+import type { ServiceRegistry } from "../clients/registry.js";
+import { McpServiceError } from "../types/errors.js";
 
-export function registerAdminTools(server: McpServer, platformUrl: string) {
-  const client = new PlatformClient(platformUrl, process.env.API_KEY);
-
-  server.tool(
-    "admin_list_users",
-    "List all users with their tier level and usage statistics (ProMax admin only)",
-    {},
-    async () => ({
-      content: [{ type: "text", text: await client.listUsers() }],
-    }),
-  );
-
-  server.tool(
-    "admin_change_user_tier",
-    "Change a user's subscription tier (ProMax admin only)",
+export function registerAdminTools(server: McpServer, reg: ServiceRegistry) {
+  server.registerTool(
+    "list_users",
     {
-      user_id: z.string().describe("User ID to modify"),
-      tier: z
-        .enum(["free", "pro", "promax"])
-        .describe("New tier: 'free', 'pro', or 'promax'"),
+      description: "List all users with tier level and usage statistics (admin only)",
     },
-    async ({ user_id, tier }) => ({
-      content: [
-        { type: "text", text: await client.changeUserTier(user_id, tier) },
-      ],
-    }),
+    async () => {
+      try {
+        reg.requirePlatform();
+        const data = await reg.platform!.listUsers();
+        return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+      } catch (e) {
+        if (e instanceof McpServiceError) return e.toToolResult();
+        throw e;
+      }
+    },
   );
 
-  server.tool(
-    "admin_list_all_bots",
-    "List all bots across all users with owner, state, and resource usage (ProMax admin only)",
-    {},
-    async () => ({
-      content: [{ type: "text", text: await client.listAllBots() }],
-    }),
-  );
-
-  server.tool(
-    "admin_kill_bot",
-    "Force-stop any bot by ID — emergency kill switch (ProMax admin only)",
+  server.registerTool(
+    "update_user_tier",
     {
-      bot_id: z.string().describe("Bot ID to force-stop"),
+      description: "Change a user's subscription tier (admin only)",
+      inputSchema: {
+        user_id: z.string().describe("User ID to modify"),
+        tier: z.enum(["free", "starter", "pro", "enterprise"]).describe("New tier level"),
+      },
     },
-    async ({ bot_id }) => ({
-      content: [{ type: "text", text: await client.killBot(bot_id) }],
-    }),
+    async ({ user_id, tier }) => {
+      try {
+        reg.requirePlatform();
+        const data = await reg.platform!.updateUserTier(user_id, tier);
+        return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+      } catch (e) {
+        if (e instanceof McpServiceError) return e.toToolResult();
+        throw e;
+      }
+    },
   );
 
-  server.tool(
-    "admin_system_health",
-    "System health dashboard — services, queues, resource utilization (ProMax admin only)",
-    {},
-    async () => ({
-      content: [{ type: "text", text: await client.getSystemHealth() }],
-    }),
-  );
-
-  server.tool(
-    "admin_audit_log",
-    "View admin audit log — who did what and when (ProMax admin only)",
+  server.registerTool(
+    "system_health",
     {
-      limit: z
-        .number()
-        .optional()
-        .describe("Maximum number of log entries to return (default: 50)"),
+      description: "System health dashboard: services, connections, resource utilization (admin only)",
     },
-    async ({ limit }) => ({
-      content: [{ type: "text", text: await client.getAuditLog(limit) }],
-    }),
+    async () => {
+      try {
+        reg.requirePlatform();
+        const data = await reg.platform!.systemHealth();
+        return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+      } catch (e) {
+        if (e instanceof McpServiceError) return e.toToolResult();
+        throw e;
+      }
+    },
+  );
+
+  server.registerTool(
+    "audit_log",
+    {
+      description: "View admin audit log (admin only)",
+      inputSchema: { limit: z.number().optional().describe("Max entries (default: 100)") },
+    },
+    async ({ limit }) => {
+      try {
+        reg.requirePlatform();
+        const data = await reg.platform!.getAuditLog(limit ?? 100);
+        return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+      } catch (e) {
+        if (e instanceof McpServiceError) return e.toToolResult();
+        throw e;
+      }
+    },
   );
 }
