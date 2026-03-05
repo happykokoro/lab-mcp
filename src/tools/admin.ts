@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { PlatformClient } from "../client/platform.js";
+import { tierGatedTool } from "../auth/tierGate.js";
 
 export function registerAdminTools(server: McpServer, platformUrl: string) {
   const client = new PlatformClient(platformUrl, process.env.API_KEY);
@@ -9,9 +10,9 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
     "admin_list_users",
     "List all users with their tier level and usage statistics (ProMax admin only)",
     {},
-    async () => ({
+    tierGatedTool("promax", async () => ({
       content: [{ type: "text", text: await client.listUsers() }],
-    }),
+    })),
   );
 
   server.tool(
@@ -23,20 +24,23 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
         .enum(["free", "pro", "promax"])
         .describe("New tier: 'free', 'pro', or 'promax'"),
     },
-    async ({ user_id, tier }) => ({
+    tierGatedTool("promax", async ({ user_id, tier }) => ({
       content: [
-        { type: "text", text: await client.changeUserTier(user_id, tier) },
+        {
+          type: "text",
+          text: await client.changeUserTier(user_id as string, tier as string),
+        },
       ],
-    }),
+    })),
   );
 
   server.tool(
     "admin_list_all_bots",
     "List all bots across all users with owner, state, and resource usage (ProMax admin only)",
     {},
-    async () => ({
+    tierGatedTool("promax", async () => ({
       content: [{ type: "text", text: await client.listAllBots() }],
-    }),
+    })),
   );
 
   server.tool(
@@ -45,18 +49,18 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
     {
       bot_id: z.string().describe("Bot ID to force-stop"),
     },
-    async ({ bot_id }) => ({
-      content: [{ type: "text", text: await client.killBot(bot_id) }],
-    }),
+    tierGatedTool("promax", async ({ bot_id }) => ({
+      content: [{ type: "text", text: await client.killBot(bot_id as string) }],
+    })),
   );
 
   server.tool(
     "admin_system_health",
     "System health dashboard — services, queues, resource utilization (ProMax admin only)",
     {},
-    async () => ({
+    tierGatedTool("promax", async () => ({
       content: [{ type: "text", text: await client.getSystemHealth() }],
-    }),
+    })),
   );
 
   server.tool(
@@ -68,8 +72,10 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
         .optional()
         .describe("Maximum number of log entries to return (default: 50)"),
     },
-    async ({ limit }) => ({
-      content: [{ type: "text", text: await client.getAuditLog(limit) }],
-    }),
+    tierGatedTool("promax", async ({ limit }) => ({
+      content: [
+        { type: "text", text: await client.getAuditLog(limit as number) },
+      ],
+    })),
   );
 }

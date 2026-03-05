@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { PlatformClient } from "../client/platform.js";
+import { tierGatedTool } from "../auth/tierGate.js";
 
 export function registerEngineTools(server: McpServer, platformUrl: string) {
   const client = new PlatformClient(platformUrl, process.env.API_KEY);
@@ -15,14 +16,14 @@ export function registerEngineTools(server: McpServer, platformUrl: string) {
         .optional()
         .describe("Optional deployment configuration overrides"),
     },
-    async ({ artifact_id, config }) => ({
+    tierGatedTool("level2", async ({ artifact_id, config }) => ({
       content: [
         {
           type: "text",
           text: await client.deployBot({ artifact_id, config }),
         },
       ],
-    }),
+    })),
   );
 
   server.tool(
@@ -31,9 +32,9 @@ export function registerEngineTools(server: McpServer, platformUrl: string) {
     {
       bot_id: z.string().describe("The bot ID to stop"),
     },
-    async ({ bot_id }) => ({
-      content: [{ type: "text", text: await client.stopBot(bot_id) }],
-    }),
+    tierGatedTool("level2", async ({ bot_id }) => ({
+      content: [{ type: "text", text: await client.stopBot(bot_id as string) }],
+    })),
   );
 
   server.tool(
@@ -42,44 +43,46 @@ export function registerEngineTools(server: McpServer, platformUrl: string) {
     {
       bot_id: z.string().describe("The bot ID to query"),
     },
-    async ({ bot_id }) => ({
-      content: [{ type: "text", text: await client.getBotStatus(bot_id) }],
-    }),
+    tierGatedTool("level2", async ({ bot_id }) => ({
+      content: [
+        { type: "text", text: await client.getBotStatus(bot_id as string) },
+      ],
+    })),
   );
 
   server.tool(
     "engine_list_bots",
     "List all deployed bots with their current state and summary metrics",
     {},
-    async () => ({
+    tierGatedTool("level2", async () => ({
       content: [{ type: "text", text: await client.listBots() }],
-    }),
+    })),
   );
 
   server.tool(
     "engine_cluster_health",
     "Check engine cluster health — node count, capacity, and resource usage",
     {},
-    async () => ({
+    tierGatedTool("level2", async () => ({
       content: [{ type: "text", text: await client.getClusterHealth() }],
-    }),
+    })),
   );
 
   server.tool(
     "engine_positions",
     "Get real-time positions across all running bots (polling snapshot)",
     {},
-    async () => ({
+    tierGatedTool("level2", async () => ({
       content: [{ type: "text", text: await client.getPositionsStream() }],
-    }),
+    })),
   );
 
   server.tool(
     "engine_trades",
     "Get recent trades across all running bots (polling snapshot)",
     {},
-    async () => ({
+    tierGatedTool("level2", async () => ({
       content: [{ type: "text", text: await client.getTradesStream() }],
-    }),
+    })),
   );
 }

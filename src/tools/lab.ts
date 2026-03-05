@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { tierGatedTool } from "../auth/tierGate.js";
 
 async function labFetch(
   labUrl: string,
@@ -64,18 +65,18 @@ export function registerLabTools(
     "lab_health",
     "Check if the lab service is running",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [{ type: "text", text: await labFetch(labUrl, "/health") }],
-    }),
+    })),
   );
 
   server.tool(
     "lab_mode",
     "Get the lab's current operating mode",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [{ type: "text", text: await labFetch(labUrl, "/api/mode") }],
-    }),
+    })),
   );
 
   // ── Signals ────────────────────────────────────────────────────
@@ -84,20 +85,20 @@ export function registerLabTools(
     "lab_signals",
     "List all active factor signals with direction, confidence, and token",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [{ type: "text", text: await labFetch(labUrl, "/api/signals") }],
-    }),
+    })),
   );
 
   server.tool(
     "lab_pending_signals",
     "List signals awaiting manual approval before execution",
     {},
-    async () => ({
+    tierGatedTool("level2", async () => ({
       content: [
         { type: "text", text: await labFetch(labUrl, "/api/signals/pending") },
       ],
-    }),
+    })),
   );
 
   server.tool(
@@ -106,7 +107,7 @@ export function registerLabTools(
     {
       signal_id: z.string().describe("The ID of the pending signal to approve"),
     },
-    async ({ signal_id }) => ({
+    tierGatedTool("level2", async ({ signal_id }) => ({
       content: [
         {
           type: "text",
@@ -117,7 +118,7 @@ export function registerLabTools(
           ),
         },
       ],
-    }),
+    })),
   );
 
   // ── Positions ──────────────────────────────────────────────────
@@ -126,25 +127,25 @@ export function registerLabTools(
     "lab_positions",
     "List all positions (open and closed) with entry price, PnL, and status",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [
         { type: "text", text: await labFetch(labUrl, "/api/positions") },
       ],
-    }),
+    })),
   );
 
   server.tool(
     "lab_positions_summary",
     "Get a summary of open position count and total PnL in SOL",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [
         {
           type: "text",
           text: await labFetch(labUrl, "/api/positions/summary"),
         },
       ],
-    }),
+    })),
   );
 
   // ── Metrics ────────────────────────────────────────────────────
@@ -153,9 +154,9 @@ export function registerLabTools(
     "lab_metrics",
     "Get system metrics: signal count, pending count, position count, event count, trace count",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [{ type: "text", text: await labFetch(labUrl, "/api/metrics") }],
-    }),
+    })),
   );
 
   // ── Factors ────────────────────────────────────────────────────
@@ -164,9 +165,9 @@ export function registerLabTools(
     "lab_factors",
     "List all configured factors with enabled status, role, weight, and attribution scorecard",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [{ type: "text", text: await labFetch(labUrl, "/api/factors") }],
-    }),
+    })),
   );
 
   server.tool(
@@ -177,14 +178,14 @@ export function registerLabTools(
         .string()
         .describe("Factor name (e.g. 'swap-momentum', 'price-trend')"),
     },
-    async ({ factor_name }) => ({
+    tierGatedTool("level1", async ({ factor_name }) => ({
       content: [
         {
           type: "text",
           text: await labFetch(labUrl, `/api/factors/${factor_name}/scorecard`),
         },
       ],
-    }),
+    })),
   );
 
   server.tool(
@@ -195,14 +196,14 @@ export function registerLabTools(
         .string()
         .describe("Factor name (e.g. 'swap-momentum', 'price-trend')"),
     },
-    async ({ factor_name }) => ({
+    tierGatedTool("level1", async ({ factor_name }) => ({
       content: [
         {
           type: "text",
           text: await labFetch(labUrl, `/api/factors/${factor_name}/accuracy`),
         },
       ],
-    }),
+    })),
   );
 
   // ── Predictions ──────────────────────────────────────────────
@@ -211,25 +212,25 @@ export function registerLabTools(
     "lab_predictions",
     "List pending predictions awaiting validation (predictions not yet resolved against actual prices)",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [
         { type: "text", text: await labFetch(labUrl, "/api/predictions") },
       ],
-    }),
+    })),
   );
 
   server.tool(
     "lab_prediction_results",
     "Get per-factor prediction accuracy results (MAE, RMSE, directional accuracy) for all factors with predictions",
     {},
-    async () => ({
+    tierGatedTool("level1", async () => ({
       content: [
         {
           type: "text",
           text: await labFetch(labUrl, "/api/predictions/results"),
         },
       ],
-    }),
+    })),
   );
 
   // ── Expert Weights ───────────────────────────────────────────
@@ -238,11 +239,11 @@ export function registerLabTools(
     "lab_expert_weights",
     "Get the expert aggregator's learned weights for each factor — shows which factors the system trusts most",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [
         { type: "text", text: await labFetch(labUrl, "/api/experts/weights") },
       ],
-    }),
+    })),
   );
 
   // ── Correlation ────────────────────────────────────────────────
@@ -251,11 +252,11 @@ export function registerLabTools(
     "lab_correlation",
     "Get pairwise factor correlation matrices for all tracked tokens. Warns when correlation exceeds threshold.",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [
         { type: "text", text: await labFetch(labUrl, "/api/correlation") },
       ],
-    }),
+    })),
   );
 
   // ── Decision Traces ────────────────────────────────────────────
@@ -264,9 +265,9 @@ export function registerLabTools(
     "lab_traces",
     "Get the 50 most recent decision traces showing factor signals, composition, risk verdict, and execution outcome",
     {},
-    async () => ({
+    tierGatedTool("level1", async () => ({
       content: [{ type: "text", text: await labFetch(labUrl, "/api/traces") }],
-    }),
+    })),
   );
 
   // ── Strategy ───────────────────────────────────────────────────
@@ -275,25 +276,25 @@ export function registerLabTools(
     "lab_strategy",
     "Get the currently loaded strategy configuration (factors, roles, thresholds)",
     {},
-    async () => ({
+    tierGatedTool("level1", async () => ({
       content: [
         { type: "text", text: await labFetch(labUrl, "/api/strategy") },
       ],
-    }),
+    })),
   );
 
   server.tool(
     "lab_strategy_reload",
     "Hot-reload the strategy TOML from disk. Use after editing strategy files.",
     {},
-    async () => ({
+    tierGatedTool("level2", async () => ({
       content: [
         {
           type: "text",
           text: await labFetch(labUrl, "/api/strategy/reload", "POST"),
         },
       ],
-    }),
+    })),
   );
 
   // ── Events ─────────────────────────────────────────────────────
@@ -302,9 +303,9 @@ export function registerLabTools(
     "lab_events",
     "Get the 100 most recent events (signals, compositions, risk decisions, trade executions, reloads)",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [{ type: "text", text: await labFetch(labUrl, "/api/events") }],
-    }),
+    })),
   );
 
   // ── Wallets ────────────────────────────────────────────────────
@@ -313,11 +314,11 @@ export function registerLabTools(
     "lab_tracked_wallets",
     "List all wallets being monitored for swap activity",
     {},
-    async () => ({
+    tierGatedTool("level1", async () => ({
       content: [
         { type: "text", text: await labFetch(labUrl, "/api/tracked-wallets") },
       ],
-    }),
+    })),
   );
 
   // ── Backtesting ───────────────────────────────────────────────
@@ -345,35 +346,43 @@ export function registerLabTools(
         .optional()
         .describe("Number of steps for scenario generation (default: 120)"),
     },
-    async ({ scenario, file_path, token_mint, steps }) => {
-      const body: Record<string, unknown> = {};
-      if (scenario) body.scenario = scenario;
-      if (file_path) body.file_path = file_path;
-      if (token_mint) body.token_mint = token_mint;
-      if (steps) body.steps = steps;
-      return {
-        content: [
-          {
-            type: "text",
-            text: await labFetchWithBody(labUrl, "/api/backtest", "POST", body),
-          },
-        ],
-      };
-    },
+    tierGatedTool(
+      "level2",
+      async ({ scenario, file_path, token_mint, steps }) => {
+        const body: Record<string, unknown> = {};
+        if (scenario) body.scenario = scenario;
+        if (file_path) body.file_path = file_path;
+        if (token_mint) body.token_mint = token_mint;
+        if (steps) body.steps = steps;
+        return {
+          content: [
+            {
+              type: "text",
+              text: await labFetchWithBody(
+                labUrl,
+                "/api/backtest",
+                "POST",
+                body,
+              ),
+            },
+          ],
+        };
+      },
+    ),
   );
 
   server.tool(
     "lab_backtest_scenarios",
     "List available backtest scenarios with their default parameters and descriptions",
     {},
-    async () => ({
+    tierGatedTool("free", async () => ({
       content: [
         {
           type: "text",
           text: await labFetch(labUrl, "/api/backtest/scenarios"),
         },
       ],
-    }),
+    })),
   );
 
   // ── Candles (Pricing Service) ─────────────────────────────────
@@ -388,19 +397,19 @@ export function registerLabTools(
         .optional()
         .describe("Candle timeframe (e.g. '1m', '5m', '1h'). Default: '1m'"),
     },
-    async ({ symbol, timeframe }) => {
-      const tf = timeframe ?? "1m";
+    tierGatedTool("free", async ({ symbol, timeframe }) => {
+      const tf = (timeframe as string) ?? "1m";
       return {
         content: [
           {
             type: "text",
             text: await pricingFetch(
               pricingUrl,
-              `/api/market/candles/${encodeURIComponent(symbol)}?timeframe=${encodeURIComponent(tf)}`,
+              `/api/market/candles/${encodeURIComponent(symbol as string)}?timeframe=${encodeURIComponent(tf)}`,
             ),
           },
         ],
       };
-    },
+    }),
   );
 }

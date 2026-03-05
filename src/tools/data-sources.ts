@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { PlatformClient } from "../client/platform.js";
+import { tierGatedTool } from "../auth/tierGate.js";
 
 export function registerDataSourceTools(
   server: McpServer,
@@ -12,9 +13,9 @@ export function registerDataSourceTools(
     "data_list_sources",
     "List available data source adapters with their asset class and connection status",
     {},
-    async () => ({
+    tierGatedTool("level2", async () => ({
       content: [{ type: "text", text: await client.listDataSources() }],
-    }),
+    })),
   );
 
   server.tool(
@@ -29,11 +30,17 @@ export function registerDataSourceTools(
         .optional()
         .describe("Optional configuration overrides for the adapter"),
     },
-    async ({ name, config }) => ({
+    tierGatedTool("level2", async ({ name, config }) => ({
       content: [
-        { type: "text", text: await client.startAdapter(name, config) },
+        {
+          type: "text",
+          text: await client.startAdapter(
+            name as string,
+            config as Record<string, unknown> | undefined,
+          ),
+        },
       ],
-    }),
+    })),
   );
 
   server.tool(
@@ -42,9 +49,11 @@ export function registerDataSourceTools(
     {
       name: z.string().describe("Adapter name to stop"),
     },
-    async ({ name }) => ({
-      content: [{ type: "text", text: await client.stopAdapter(name) }],
-    }),
+    tierGatedTool("level2", async ({ name }) => ({
+      content: [
+        { type: "text", text: await client.stopAdapter(name as string) },
+      ],
+    })),
   );
 
   server.tool(
@@ -56,9 +65,14 @@ export function registerDataSourceTools(
         .describe("Data format: 'jsonl' or 'csv'"),
       data: z.string().describe("Raw data content to upload"),
     },
-    async ({ format, data }) => ({
-      content: [{ type: "text", text: await client.uploadData(format, data) }],
-    }),
+    tierGatedTool("level2", async ({ format, data }) => ({
+      content: [
+        {
+          type: "text",
+          text: await client.uploadData(format as string, data as string),
+        },
+      ],
+    })),
   );
 
   server.tool(
@@ -67,8 +81,10 @@ export function registerDataSourceTools(
     {
       name: z.string().describe("Adapter name to check"),
     },
-    async ({ name }) => ({
-      content: [{ type: "text", text: await client.getAdapterStatus(name) }],
-    }),
+    tierGatedTool("level2", async ({ name }) => ({
+      content: [
+        { type: "text", text: await client.getAdapterStatus(name as string) },
+      ],
+    })),
   );
 }
