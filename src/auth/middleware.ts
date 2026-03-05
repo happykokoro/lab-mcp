@@ -47,7 +47,7 @@ export async function validateApiKey(
 
   try {
     const res = await fetch(`${platformUrl}/api/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { "X-API-Key": token },
     });
     if (!res.ok) return null;
 
