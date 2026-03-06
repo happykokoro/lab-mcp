@@ -2,7 +2,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { createMcpServer } from "./server.js";
 import { startHttpServer } from "./transport/http.js";
 
-const LAB_URL = process.env.LAB_URL ?? "http://localhost:4000";
+const LAB_URL = process.env.LAB_URL ?? "http://localhost:4100";
 const PRICING_URL = process.env.PRICING_URL ?? "http://localhost:4002";
 const PLATFORM_URL = process.env.PLATFORM_URL ?? "http://localhost:4000";
 const MCP_TRANSPORT = process.env.MCP_TRANSPORT ?? "http";

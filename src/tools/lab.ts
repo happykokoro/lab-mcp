@@ -385,6 +385,206 @@ export function registerLabTools(
     })),
   );
 
+  // ── Position History ─────────────────────────────────────────
+
+  server.tool(
+    "lab_positions_history",
+    "Get historical positions with entry/exit prices and realized PnL",
+    {},
+    tierGatedTool("free", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/positions/history"),
+        },
+      ],
+    })),
+  );
+
+  // ── Execution Config ────────────────────────────────────────
+
+  server.tool(
+    "lab_execution_config",
+    "Get the current execution configuration (slippage, size limits, cooldowns)",
+    {},
+    tierGatedTool("level1", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/execution/config"),
+        },
+      ],
+    })),
+  );
+
+  server.tool(
+    "lab_execution_reload",
+    "Hot-reload the execution configuration from disk",
+    {},
+    tierGatedTool("level2", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/execution/reload", "POST"),
+        },
+      ],
+    })),
+  );
+
+  server.tool(
+    "lab_execution_history",
+    "Get recent execution history (fills, rejects, errors)",
+    {},
+    tierGatedTool("level1", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/execution/history"),
+        },
+      ],
+    })),
+  );
+
+  // ── Diagnostics ─────────────────────────────────────────────
+
+  server.tool(
+    "lab_filter_state",
+    "Get the current state of all signal filters (Kalman, EMA, Wavelet)",
+    {},
+    tierGatedTool("level1", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/diagnostics/filter-state"),
+        },
+      ],
+    })),
+  );
+
+  server.tool(
+    "lab_confidence",
+    "Get confidence diagnostics for active signals",
+    {},
+    tierGatedTool("level1", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/diagnostics/confidence"),
+        },
+      ],
+    })),
+  );
+
+  server.tool(
+    "lab_diagnostic_predictions",
+    "Get diagnostic prediction details (predicted vs actual, error distribution)",
+    {},
+    tierGatedTool("level1", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/diagnostics/predictions"),
+        },
+      ],
+    })),
+  );
+
+  server.tool(
+    "lab_convergence_history",
+    "Get convergence history for factor weight optimization",
+    {},
+    tierGatedTool("level1", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/diagnostics/convergence-history"),
+        },
+      ],
+    })),
+  );
+
+  // ── Microstructure ──────────────────────────────────────────
+
+  server.tool(
+    "lab_microstructure",
+    "Get microstructure state (order book imbalance, spread, trade flow)",
+    {},
+    tierGatedTool("level1", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/microstructure/state"),
+        },
+      ],
+    })),
+  );
+
+  // ── Chart Data ──────────────────────────────────────────────
+
+  server.tool(
+    "lab_price_history",
+    "Get price history for tracked tokens",
+    {},
+    tierGatedTool("free", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/price-history"),
+        },
+      ],
+    })),
+  );
+
+  server.tool(
+    "lab_equity_curve",
+    "Get the portfolio equity curve over time",
+    {},
+    tierGatedTool("free", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/equity-curve"),
+        },
+      ],
+    })),
+  );
+
+  // ── Reports ─────────────────────────────────────────────────
+
+  server.tool(
+    "lab_transparency_report",
+    "Get factor transparency report showing signal attribution and weight evolution",
+    {},
+    tierGatedTool("level1", async () => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetch(labUrl, "/api/reports/factor-transparency"),
+        },
+      ],
+    })),
+  );
+
+  // ── Replay ──────────────────────────────────────────────────
+
+  server.tool(
+    "lab_replay_run",
+    "Run a replay from a JSONL file through the full factor pipeline",
+    {
+      file_path: z.string().describe("Absolute path to a JSONL replay file"),
+    },
+    tierGatedTool("level2", async ({ file_path }) => ({
+      content: [
+        {
+          type: "text",
+          text: await labFetchWithBody(labUrl, "/api/replay/run", "POST", {
+            file_path,
+          }),
+        },
+      ],
+    })),
+  );
+
   // ── Candles (Pricing Service) ─────────────────────────────────
 
   server.tool(
