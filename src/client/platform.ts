@@ -131,41 +131,49 @@ export class PlatformClient {
     return this.request(`/api/engine/status/${encodeURIComponent(botId)}`);
   }
   async listBots() {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/engine/bots");
   }
   async getClusterHealth() {
     return this.request("/api/engine/health");
   }
   async getPositionsStream() {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/engine/positions");
   }
   async getTradesStream() {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/engine/trades");
   }
 
   // Data sources
   async listDataSources() {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/data-sources");
   }
   async startAdapter(name: string, config?: Record<string, unknown>) {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/data-sources/start", {
       method: "POST",
       body: JSON.stringify({ name, config }),
     });
   }
   async stopAdapter(name: string) {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/data-sources/stop", {
       method: "POST",
       body: JSON.stringify({ name }),
     });
   }
   async uploadData(format: string, data: string) {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/data-sources/upload", {
       method: "POST",
       body: JSON.stringify({ format, data }),
     });
   }
   async getAdapterStatus(name: string) {
+    // TODO: endpoint not yet implemented on backend
     return this.request(`/api/data-sources/status/${encodeURIComponent(name)}`);
   }
 
@@ -174,18 +182,21 @@ export class PlatformClient {
     return this.request("/api/artifact/export", { method: "POST" });
   }
   async validateArtifact(artifact: unknown) {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/artifact/validate", {
       method: "POST",
       body: JSON.stringify(artifact),
     });
   }
   async loadArtifact(filePath: string) {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/artifact/load", {
       method: "POST",
       body: JSON.stringify({ file_path: filePath }),
     });
   }
   async listArtifacts() {
+    // TODO: endpoint not yet implemented on backend
     return this.request("/api/artifacts");
   }
 
@@ -203,15 +214,15 @@ export class PlatformClient {
     return this.request("/api/admin/bots");
   }
   async killBot(botId: string) {
-    return this.request(`/api/admin/bots/${encodeURIComponent(botId)}/kill`, {
-      method: "POST",
+    return this.request(`/api/admin/bots/${encodeURIComponent(botId)}`, {
+      method: "DELETE",
     });
   }
   async getSystemHealth() {
-    return this.request("/api/admin/health");
+    return this.request("/api/admin/system");
   }
   async getAuditLog(limit?: number) {
     const query = limit ? `?limit=${limit}` : "";
-    return this.request(`/api/admin/audit-log${query}`);
+    return this.request(`/api/admin/audit${query}`);
   }
 }
