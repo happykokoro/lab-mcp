@@ -4,6 +4,7 @@ import { registerEngineTools } from "./tools/engine.js";
 import { registerDataSourceTools } from "./tools/data-sources.js";
 import { registerArtifactTools } from "./tools/artifacts.js";
 import { registerAdminTools } from "./tools/admin.js";
+import { registerPolymarketTools } from "./tools/polymarket.js";
 
 export interface ServerUrls {
   labUrl: string;
@@ -22,6 +23,7 @@ export function createMcpServer(urls: ServerUrls): McpServer {
   registerDataSourceTools(server, urls.platformUrl);
   registerArtifactTools(server, urls.platformUrl);
   registerAdminTools(server, urls.platformUrl);
+  registerPolymarketTools(server, urls.labUrl);
 
   return server;
 }

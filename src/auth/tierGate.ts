@@ -60,6 +60,15 @@ const TOOL_TIERS: Record<string, Tier> = {
   artifact_load: "level2",
   artifact_list: "level2",
 
+  // Polymarket
+  poly_markets: "free",
+  poly_market_detail: "level1",
+  poly_arbitrage: "level1",
+  poly_copula: "level1",
+  poly_positions: "level1",
+  poly_simulate: "level2",
+  poly_quotes: "level1",
+
   // ProMax — admin
   admin_list_users: "promax",
   admin_change_user_tier: "promax",
