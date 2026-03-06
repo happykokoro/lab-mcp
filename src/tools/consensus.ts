@@ -3,15 +3,22 @@ import { z } from "zod";
 import { tierGatedTool } from "../auth/tierGate.js";
 
 async function consFetch(labUrl: string, path: string): Promise<string> {
-  const res = await fetch(`${labUrl}${path}`);
-  if (!res.ok) {
-    const body = await res.text().catch((e) => {
-      console.error("Failed to read error body:", e);
-      return "";
+  try {
+    const res = await fetch(`${labUrl}${path}`);
+    if (!res.ok) {
+      const body = await res.text().catch((e) => {
+        console.error("Failed to read error body:", e);
+        return "";
+      });
+      return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
+    }
+    return JSON.stringify(await res.json(), null, 2);
+  } catch (err) {
+    return JSON.stringify({
+      error: "service_unavailable",
+      message: String(err),
     });
-    return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
   }
-  return JSON.stringify(await res.json(), null, 2);
 }
 
 async function consFetchWithBody(
@@ -20,22 +27,29 @@ async function consFetchWithBody(
   method: string,
   body: unknown,
 ): Promise<string> {
-  const res = await fetch(`${labUrl}${path}`, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch((e) => {
-      console.error("Failed to read error body:", e);
-      return "";
+  try {
+    const res = await fetch(`${labUrl}${path}`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
+    if (!res.ok) {
+      const text = await res.text().catch((e) => {
+        console.error("Failed to read error body:", e);
+        return "";
+      });
+      return JSON.stringify({
+        error: `${res.status} ${res.statusText}`,
+        body: text,
+      });
+    }
+    return JSON.stringify(await res.json(), null, 2);
+  } catch (err) {
     return JSON.stringify({
-      error: `${res.status} ${res.statusText}`,
-      body: text,
+      error: "service_unavailable",
+      message: String(err),
     });
   }
-  return JSON.stringify(await res.json(), null, 2);
 }
 
 export function registerConsensusTools(server: McpServer, labUrl: string) {
@@ -58,8 +72,14 @@ export function registerConsensusTools(server: McpServer, labUrl: string) {
     "Submit a manual signal contribution to the consensus",
     {
       token_mint: z.string().describe("Token mint address"),
-      direction: z.string().describe("Signal direction ('long' or 'short')"),
-      confidence: z.number().describe("Confidence level (0.0 to 1.0)"),
+      direction: z
+        .enum(["long", "short"])
+        .describe("Signal direction ('long' or 'short')"),
+      confidence: z
+        .number()
+        .min(0)
+        .max(1)
+        .describe("Confidence level (0.0 to 1.0)"),
     },
     tierGatedTool("level2", async ({ token_mint, direction, confidence }) => ({
       content: [

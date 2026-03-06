@@ -12,18 +12,28 @@ export class PlatformClient {
       "Content-Type": "application/json",
     };
     if (this.apiKey) headers["Authorization"] = `Bearer ${this.apiKey}`;
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      ...options,
-      headers: { ...headers, ...(options?.headers as Record<string, string>) },
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
+    try {
+      const res = await fetch(`${this.baseUrl}${path}`, {
+        ...options,
+        headers: {
+          ...headers,
+          ...(options?.headers as Record<string, string>),
+        },
+      });
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        return JSON.stringify({
+          error: `${res.status} ${res.statusText}`,
+          body,
+        });
+      }
+      return JSON.stringify(await res.json(), null, 2);
+    } catch (err) {
       return JSON.stringify({
-        error: `${res.status} ${res.statusText}`,
-        body,
+        error: "service_unavailable",
+        message: String(err),
       });
     }
-    return JSON.stringify(await res.json(), null, 2);
   }
 
   // Lab proxy
@@ -40,7 +50,10 @@ export class PlatformClient {
     return this.request("/api/signals/pending");
   }
   async approveSignal(signalId: string) {
-    return this.request(`/api/signals/${signalId}/approve`, { method: "POST" });
+    return this.request(
+      `/api/signals/${encodeURIComponent(signalId)}/approve`,
+      { method: "POST" },
+    );
   }
   async getPositions() {
     return this.request("/api/positions");
@@ -55,10 +68,14 @@ export class PlatformClient {
     return this.request("/api/factors");
   }
   async getFactorScorecard(factorName: string) {
-    return this.request(`/api/factors/${factorName}/scorecard`);
+    return this.request(
+      `/api/factors/${encodeURIComponent(factorName)}/scorecard`,
+    );
   }
   async getFactorAccuracy(factorName: string) {
-    return this.request(`/api/factors/${factorName}/accuracy`);
+    return this.request(
+      `/api/factors/${encodeURIComponent(factorName)}/accuracy`,
+    );
   }
   async getPredictions() {
     return this.request("/api/predictions");
@@ -111,7 +128,7 @@ export class PlatformClient {
     });
   }
   async getBotStatus(botId: string) {
-    return this.request(`/api/engine/status/${botId}`);
+    return this.request(`/api/engine/status/${encodeURIComponent(botId)}`);
   }
   async listBots() {
     return this.request("/api/engine/bots");
@@ -149,7 +166,7 @@ export class PlatformClient {
     });
   }
   async getAdapterStatus(name: string) {
-    return this.request(`/api/data-sources/status/${name}`);
+    return this.request(`/api/data-sources/status/${encodeURIComponent(name)}`);
   }
 
   // Artifacts
@@ -177,7 +194,7 @@ export class PlatformClient {
     return this.request("/api/admin/users");
   }
   async changeUserTier(userId: string, tier: string) {
-    return this.request(`/api/admin/users/${userId}/tier`, {
+    return this.request(`/api/admin/users/${encodeURIComponent(userId)}/tier`, {
       method: "PUT",
       body: JSON.stringify({ tier }),
     });
@@ -186,7 +203,9 @@ export class PlatformClient {
     return this.request("/api/admin/bots");
   }
   async killBot(botId: string) {
-    return this.request(`/api/admin/bots/${botId}/kill`, { method: "POST" });
+    return this.request(`/api/admin/bots/${encodeURIComponent(botId)}/kill`, {
+      method: "POST",
+    });
   }
   async getSystemHealth() {
     return this.request("/api/admin/health");

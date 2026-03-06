@@ -12,12 +12,29 @@ import { authMiddleware } from "../auth/middleware.js";
 interface SessionEntry {
   transport: StreamableHTTPServerTransport;
   clientId: string;
+  lastActivity: number;
 }
 
 export function startHttpServer(urls: ServerUrls, port: number) {
   const sessions = new Map<string, SessionEntry>();
   const auth = authMiddleware(urls.platformUrl);
   const corsOrigin = process.env.CORS_ORIGIN ?? "https://alpha.happykokoro.com";
+  const SESSION_IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
+  // Periodically clean up idle sessions
+  const sessionCleanupInterval = setInterval(
+    () => {
+      const now = Date.now();
+      for (const [id, entry] of sessions) {
+        if (now - entry.lastActivity > SESSION_IDLE_TIMEOUT_MS) {
+          entry.transport.close();
+          sessions.delete(id);
+        }
+      }
+    },
+    5 * 60 * 1000,
+  ); // check every 5 minutes
+  sessionCleanupInterval.unref();
 
   const httpServer = createServer(
     async (req: IncomingMessage & { auth?: AuthInfo }, res: ServerResponse) => {
@@ -90,6 +107,7 @@ export function startHttpServer(urls: ServerUrls, port: number) {
           );
           return;
         }
+        entry.lastActivity = Date.now();
         await entry.transport.handleRequest(req, res, parsedBody);
         return;
       }
@@ -102,6 +120,7 @@ export function startHttpServer(urls: ServerUrls, port: number) {
             sessions.set(id, {
               transport,
               clientId: req.auth!.clientId,
+              lastActivity: Date.now(),
             });
           },
         });
@@ -146,6 +165,7 @@ export function startHttpServer(urls: ServerUrls, port: number) {
 
   function shutdown() {
     console.log("Shutting down...");
+    clearInterval(sessionCleanupInterval);
     for (const entry of sessions.values()) {
       entry.transport.close();
     }

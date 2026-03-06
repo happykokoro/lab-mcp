@@ -21,8 +21,8 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
     {
       user_id: z.string().describe("User ID to modify"),
       tier: z
-        .enum(["free", "pro", "promax"])
-        .describe("New tier: 'free', 'pro', or 'promax'"),
+        .enum(["free", "level1", "level2", "promax"])
+        .describe("New tier: 'free', 'level1', 'level2', or 'promax'"),
     },
     tierGatedTool("promax", async ({ user_id, tier }) => ({
       content: [

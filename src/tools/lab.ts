@@ -7,15 +7,22 @@ async function labFetch(
   path: string,
   method = "GET",
 ): Promise<string> {
-  const res = await fetch(`${labUrl}${path}`, { method });
-  if (!res.ok) {
-    const body = await res.text().catch((e) => {
-      console.error("Failed to read error body:", e);
-      return "";
+  try {
+    const res = await fetch(`${labUrl}${path}`, { method });
+    if (!res.ok) {
+      const body = await res.text().catch((e) => {
+        console.error("Failed to read error body:", e);
+        return "";
+      });
+      return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
+    }
+    return JSON.stringify(await res.json(), null, 2);
+  } catch (err) {
+    return JSON.stringify({
+      error: "service_unavailable",
+      message: String(err),
     });
-    return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
   }
-  return JSON.stringify(await res.json(), null, 2);
 }
 
 async function labFetchWithBody(
@@ -24,34 +31,48 @@ async function labFetchWithBody(
   method: string,
   body: unknown,
 ): Promise<string> {
-  const res = await fetch(`${labUrl}${path}`, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch((e) => {
-      console.error("Failed to read error body:", e);
-      return "";
+  try {
+    const res = await fetch(`${labUrl}${path}`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
+    if (!res.ok) {
+      const text = await res.text().catch((e) => {
+        console.error("Failed to read error body:", e);
+        return "";
+      });
+      return JSON.stringify({
+        error: `${res.status} ${res.statusText}`,
+        body: text,
+      });
+    }
+    return JSON.stringify(await res.json(), null, 2);
+  } catch (err) {
     return JSON.stringify({
-      error: `${res.status} ${res.statusText}`,
-      body: text,
+      error: "service_unavailable",
+      message: String(err),
     });
   }
-  return JSON.stringify(await res.json(), null, 2);
 }
 
 async function pricingFetch(pricingUrl: string, path: string): Promise<string> {
-  const res = await fetch(`${pricingUrl}${path}`);
-  if (!res.ok) {
-    const body = await res.text().catch((e) => {
-      console.error("Failed to read error body:", e);
-      return "";
+  try {
+    const res = await fetch(`${pricingUrl}${path}`);
+    if (!res.ok) {
+      const body = await res.text().catch((e) => {
+        console.error("Failed to read error body:", e);
+        return "";
+      });
+      return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
+    }
+    return JSON.stringify(await res.json(), null, 2);
+  } catch (err) {
+    return JSON.stringify({
+      error: "service_unavailable",
+      message: String(err),
     });
-    return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
   }
-  return JSON.stringify(await res.json(), null, 2);
 }
 
 export function registerLabTools(
@@ -113,7 +134,7 @@ export function registerLabTools(
           type: "text",
           text: await labFetch(
             labUrl,
-            `/api/signals/${signal_id}/approve`,
+            `/api/signals/${encodeURIComponent(signal_id as string)}/approve`,
             "POST",
           ),
         },
@@ -182,7 +203,10 @@ export function registerLabTools(
       content: [
         {
           type: "text",
-          text: await labFetch(labUrl, `/api/factors/${factor_name}/scorecard`),
+          text: await labFetch(
+            labUrl,
+            `/api/factors/${encodeURIComponent(factor_name as string)}/scorecard`,
+          ),
         },
       ],
     })),
@@ -200,7 +224,10 @@ export function registerLabTools(
       content: [
         {
           type: "text",
-          text: await labFetch(labUrl, `/api/factors/${factor_name}/accuracy`),
+          text: await labFetch(
+            labUrl,
+            `/api/factors/${encodeURIComponent(factor_name as string)}/accuracy`,
+          ),
         },
       ],
     })),
@@ -350,10 +377,10 @@ export function registerLabTools(
       "level2",
       async ({ scenario, file_path, token_mint, steps }) => {
         const body: Record<string, unknown> = {};
-        if (scenario) body.scenario = scenario;
-        if (file_path) body.file_path = file_path;
-        if (token_mint) body.token_mint = token_mint;
-        if (steps) body.steps = steps;
+        if (scenario !== undefined) body.scenario = scenario;
+        if (file_path !== undefined) body.file_path = file_path;
+        if (token_mint !== undefined) body.token_mint = token_mint;
+        if (steps !== undefined) body.steps = steps;
         return {
           content: [
             {

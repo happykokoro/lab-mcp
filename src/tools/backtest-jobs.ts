@@ -7,15 +7,22 @@ async function btFetch(
   path: string,
   method = "GET",
 ): Promise<string> {
-  const res = await fetch(`${labUrl}${path}`, { method });
-  if (!res.ok) {
-    const body = await res.text().catch((e) => {
-      console.error("Failed to read error body:", e);
-      return "";
+  try {
+    const res = await fetch(`${labUrl}${path}`, { method });
+    if (!res.ok) {
+      const body = await res.text().catch((e) => {
+        console.error("Failed to read error body:", e);
+        return "";
+      });
+      return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
+    }
+    return JSON.stringify(await res.json(), null, 2);
+  } catch (err) {
+    return JSON.stringify({
+      error: "service_unavailable",
+      message: String(err),
     });
-    return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
   }
-  return JSON.stringify(await res.json(), null, 2);
 }
 
 async function btFetchWithBody(
@@ -24,22 +31,29 @@ async function btFetchWithBody(
   method: string,
   body: unknown,
 ): Promise<string> {
-  const res = await fetch(`${labUrl}${path}`, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch((e) => {
-      console.error("Failed to read error body:", e);
-      return "";
+  try {
+    const res = await fetch(`${labUrl}${path}`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
+    if (!res.ok) {
+      const text = await res.text().catch((e) => {
+        console.error("Failed to read error body:", e);
+        return "";
+      });
+      return JSON.stringify({
+        error: `${res.status} ${res.statusText}`,
+        body: text,
+      });
+    }
+    return JSON.stringify(await res.json(), null, 2);
+  } catch (err) {
     return JSON.stringify({
-      error: `${res.status} ${res.statusText}`,
-      body: text,
+      error: "service_unavailable",
+      message: String(err),
     });
   }
-  return JSON.stringify(await res.json(), null, 2);
 }
 
 export function registerBacktestJobTools(server: McpServer, labUrl: string) {
@@ -68,10 +82,10 @@ export function registerBacktestJobTools(server: McpServer, labUrl: string) {
       "level2",
       async ({ scenario, file_path, token_mint, steps }) => {
         const body: Record<string, unknown> = {};
-        if (scenario) body.scenario = scenario;
-        if (file_path) body.file_path = file_path;
-        if (token_mint) body.token_mint = token_mint;
-        if (steps) body.steps = steps;
+        if (scenario !== undefined) body.scenario = scenario;
+        if (file_path !== undefined) body.file_path = file_path;
+        if (token_mint !== undefined) body.token_mint = token_mint;
+        if (steps !== undefined) body.steps = steps;
         return {
           content: [
             {
@@ -158,9 +172,9 @@ export function registerBacktestJobTools(server: McpServer, labUrl: string) {
     },
     tierGatedTool("level2", async ({ scenario, steps, num_paths }) => {
       const body: Record<string, unknown> = {};
-      if (scenario) body.scenario = scenario;
-      if (steps) body.steps = steps;
-      if (num_paths) body.num_paths = num_paths;
+      if (scenario !== undefined) body.scenario = scenario;
+      if (steps !== undefined) body.steps = steps;
+      if (num_paths !== undefined) body.num_paths = num_paths;
       return {
         content: [
           {
@@ -193,9 +207,9 @@ export function registerBacktestJobTools(server: McpServer, labUrl: string) {
     },
     tierGatedTool("level2", async ({ scenario, steps, params }) => {
       const body: Record<string, unknown> = {};
-      if (scenario) body.scenario = scenario;
-      if (steps) body.steps = steps;
-      if (params) body.params = params;
+      if (scenario !== undefined) body.scenario = scenario;
+      if (steps !== undefined) body.steps = steps;
+      if (params !== undefined) body.params = params;
       return {
         content: [
           {
@@ -225,9 +239,9 @@ export function registerBacktestJobTools(server: McpServer, labUrl: string) {
     },
     tierGatedTool("level2", async ({ scenario, steps, window_size }) => {
       const body: Record<string, unknown> = {};
-      if (scenario) body.scenario = scenario;
-      if (steps) body.steps = steps;
-      if (window_size) body.window_size = window_size;
+      if (scenario !== undefined) body.scenario = scenario;
+      if (steps !== undefined) body.steps = steps;
+      if (window_size !== undefined) body.window_size = window_size;
       return {
         content: [
           {

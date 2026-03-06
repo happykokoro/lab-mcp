@@ -7,15 +7,22 @@ async function polyFetch(
   path: string,
   method = "GET",
 ): Promise<string> {
-  const res = await fetch(`${labUrl}${path}`, { method });
-  if (!res.ok) {
-    const body = await res.text().catch((e) => {
-      console.error("Failed to read error body:", e);
-      return "";
+  try {
+    const res = await fetch(`${labUrl}${path}`, { method });
+    if (!res.ok) {
+      const body = await res.text().catch((e) => {
+        console.error("Failed to read error body:", e);
+        return "";
+      });
+      return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
+    }
+    return JSON.stringify(await res.json(), null, 2);
+  } catch (err) {
+    return JSON.stringify({
+      error: "service_unavailable",
+      message: String(err),
     });
-    return JSON.stringify({ error: `${res.status} ${res.statusText}`, body });
   }
-  return JSON.stringify(await res.json(), null, 2);
 }
 
 async function polyFetchWithBody(
@@ -24,22 +31,29 @@ async function polyFetchWithBody(
   method: string,
   body: unknown,
 ): Promise<string> {
-  const res = await fetch(`${labUrl}${path}`, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch((e) => {
-      console.error("Failed to read error body:", e);
-      return "";
+  try {
+    const res = await fetch(`${labUrl}${path}`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
+    if (!res.ok) {
+      const text = await res.text().catch((e) => {
+        console.error("Failed to read error body:", e);
+        return "";
+      });
+      return JSON.stringify({
+        error: `${res.status} ${res.statusText}`,
+        body: text,
+      });
+    }
+    return JSON.stringify(await res.json(), null, 2);
+  } catch (err) {
     return JSON.stringify({
-      error: `${res.status} ${res.statusText}`,
-      body: text,
+      error: "service_unavailable",
+      message: String(err),
     });
   }
-  return JSON.stringify(await res.json(), null, 2);
 }
 
 export function registerPolymarketTools(server: McpServer, labUrl: string) {
@@ -135,6 +149,8 @@ export function registerPolymarketTools(server: McpServer, labUrl: string) {
       market_id: z.string().describe("The market condition ID to simulate"),
       probability: z
         .number()
+        .min(0)
+        .max(1)
         .describe("Current probability estimate (0.0 to 1.0)"),
       num_paths: z
         .number()
@@ -146,7 +162,7 @@ export function registerPolymarketTools(server: McpServer, labUrl: string) {
         market_id,
         probability,
       };
-      if (num_paths) body.num_paths = num_paths;
+      if (num_paths !== undefined) body.num_paths = num_paths;
       return {
         content: [
           {

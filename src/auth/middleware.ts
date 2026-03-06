@@ -17,6 +17,16 @@ function pruneCache() {
   for (const [k, v] of cache) {
     if (v.expiresAt <= now) cache.delete(k);
   }
+  // If still over limit after expiring, evict oldest entries
+  if (cache.size > CACHE_MAX_SIZE) {
+    const sorted = [...cache.entries()].sort(
+      (a, b) => a[1].expiresAt - b[1].expiresAt,
+    );
+    const toRemove = sorted.slice(0, cache.size - CACHE_MAX_SIZE);
+    for (const [k] of toRemove) {
+      cache.delete(k);
+    }
+  }
 }
 
 function extractToken(req: IncomingMessage): string | undefined {
@@ -74,8 +84,9 @@ export async function validateApiKey(
     });
 
     return authInfo;
-  } catch {
-    return null;
+  } catch (err) {
+    console.error("Platform auth check failed:", err);
+    throw new Error("platform_unavailable");
   }
 }
 
@@ -102,7 +113,28 @@ export function authMiddleware(platformUrl: string) {
       return;
     }
 
-    const authInfo = await validateApiKey(token, platformUrl);
+    let authInfo: AuthInfo | null;
+    try {
+      authInfo = await validateApiKey(token, platformUrl);
+    } catch (err) {
+      if (err instanceof Error && err.message === "platform_unavailable") {
+        res.writeHead(502, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            error: {
+              code: -32002,
+              message:
+                "Authentication service unavailable. Please try again later.",
+            },
+            id: null,
+          }),
+        );
+        return;
+      }
+      throw err;
+    }
+
     if (!authInfo) {
       res.writeHead(401, { "Content-Type": "application/json" });
       res.end(
