@@ -11,6 +11,7 @@ import { registerRebalanceTools } from "./tools/rebalance.js";
 import { registerTradfiTools } from "./tools/tradfi.js";
 import { registerUniverseTools } from "./tools/universe.js";
 import { registerConsensusTools } from "./tools/consensus.js";
+import { registerQuantTools } from "./tools/quant-tools.js";
 
 export interface ServerUrls {
   labUrl: string;
@@ -36,6 +37,7 @@ export function createMcpServer(urls: ServerUrls): McpServer {
   registerTradfiTools(server, urls.labUrl);
   registerUniverseTools(server, urls.labUrl);
   registerConsensusTools(server, urls.labUrl);
+  registerQuantTools(server, urls.labUrl);
 
   return server;
 }
