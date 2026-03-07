@@ -1,6 +1,6 @@
 # Lab MCP
 
-MCP (Model Context Protocol) server for the Kokoro Alpha Lab trading system. Exposes 92 tools for AI-native interaction with the Lab, Engine, and Platform services via Claude Code or any MCP-compatible client.
+MCP (Model Context Protocol) server for the Kokoro Alpha Lab trading system. Exposes 98 tools for AI-native interaction with the Lab, Engine, and Platform services via Claude Code or any MCP-compatible client.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
 ![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-blue?style=flat)
@@ -21,22 +21,23 @@ npm run start:http
 npm run start:stdio
 ```
 
-## Tool Categories (92 tools)
+## Tool Categories (98 tools)
 
-| Category      | Tools | Description                                              |
-| ------------- | ----- | -------------------------------------------------------- |
-| Lab           | 36    | Signals, positions, factors, predictions, traces, events |
-| Engine        | 7     | Bot deployment, status, positions, trades, cluster       |
-| Polymarket    | 7     | Markets, arbitrage, copula, positions, simulation        |
-| Data Sources  | 5     | Adapter management, upload, status                       |
-| Artifacts     | 4     | Strategy export, validate, load, list                    |
-| Admin         | 6     | User management, system health, audit log (ProMax only)  |
-| Backtest Jobs | 7     | Async backtests, results, comparison                     |
-| Alerts        | 7     | Alert rules, history, channels                           |
-| Rebalance     | 3     | Portfolio targets, drift, execution                      |
-| TradFi        | 4     | Equity positions, options chains, forex rates            |
-| Universe      | 3     | Token profiles, lifecycle, discovery                     |
-| Consensus     | 3     | Factor voting, aggregation, history                      |
+| Category      | Tools | Description                                                                              |
+| ------------- | ----- | ---------------------------------------------------------------------------------------- |
+| Lab           | 36    | Signals, positions, factors, predictions, traces, events                                 |
+| Engine        | 7     | Bot deployment, status, positions, trades, cluster                                       |
+| Polymarket    | 7     | Markets, arbitrage, copula, positions, simulation                                        |
+| Data Sources  | 5     | Adapter management, upload, status                                                       |
+| Artifacts     | 4     | Strategy export, validate, load, list                                                    |
+| Admin         | 6     | User management, system health, audit log (ProMax only)                                  |
+| Backtest Jobs | 7     | Async backtests, results, comparison                                                     |
+| Alerts        | 7     | Alert rules, history, channels                                                           |
+| Rebalance     | 3     | Portfolio targets, drift, execution                                                      |
+| TradFi        | 4     | Equity positions, options chains, forex rates                                            |
+| Universe      | 3     | Token profiles, lifecycle, discovery                                                     |
+| Consensus     | 3     | Factor voting, aggregation, history                                                      |
+| Quant         | 6     | GBM simulation, option pricing, portfolio optimization, copula, t-fitting, Brier scoring |
 
 ## Environment Variables
 
@@ -80,7 +81,7 @@ Claude Code / MCP Client
         ▼
    Lab MCP (:3100)
    ┌────────────────┐
-   │  92 MCP Tools   │
+   │  98 MCP Tools   │
    │  Tier Gate Auth  │
    │  HTTP + stdio    │
    └───┬────┬────┬───┘
