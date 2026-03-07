@@ -25,30 +25,30 @@ npm run start:stdio
 
 | Category      | Tools | Description                                              |
 | ------------- | ----- | -------------------------------------------------------- |
-| Lab           | 22    | Signals, positions, factors, predictions, traces, events |
-| Engine        | 8     | Bot deployment, status, positions, trades, cluster       |
-| Polymarket    | 6     | Markets, arbitrage, copula, positions, simulation        |
+| Lab           | 36    | Signals, positions, factors, predictions, traces, events |
+| Engine        | 7     | Bot deployment, status, positions, trades, cluster       |
+| Polymarket    | 7     | Markets, arbitrage, copula, positions, simulation        |
 | Data Sources  | 5     | Adapter management, upload, status                       |
 | Artifacts     | 4     | Strategy export, validate, load, list                    |
 | Admin         | 6     | User management, system health, audit log (ProMax only)  |
-| Backtest Jobs | 6     | Async backtests, results, comparison                     |
-| Alerts        | 5     | Alert rules, history, channels                           |
-| Rebalance     | 6     | Portfolio targets, drift, execution                      |
-| TradFi        | 8     | Equity positions, options chains, forex rates            |
-| Universe      | 6     | Token profiles, lifecycle, discovery                     |
-| Consensus     | 10    | Factor voting, aggregation, history                      |
+| Backtest Jobs | 7     | Async backtests, results, comparison                     |
+| Alerts        | 7     | Alert rules, history, channels                           |
+| Rebalance     | 3     | Portfolio targets, drift, execution                      |
+| TradFi        | 4     | Equity positions, options chains, forex rates            |
+| Universe      | 3     | Token profiles, lifecycle, discovery                     |
+| Consensus     | 3     | Factor voting, aggregation, history                      |
 
 ## Environment Variables
 
-| Variable        | Description                 | Default                 |
-| --------------- | --------------------------- | ----------------------- |
-| `MCP_TRANSPORT` | Transport mode (http/stdio) | `http`                  |
-| `MCP_PORT`      | HTTP server port            | `3100`                  |
-| `LAB_URL`       | Lab backend URL             | `http://localhost:4100` |
-| `PRICING_URL`   | Pricing service URL         | `http://localhost:4002` |
-| `PLATFORM_URL`  | Platform gateway URL        | `http://localhost:4000` |
-| `API_KEY`       | Backend authentication key  | —                       |
-| `CORS_ORIGIN`   | Allowed CORS origin         | `http://localhost:3001` |
+| Variable        | Description                 | Default                         |
+| --------------- | --------------------------- | ------------------------------- |
+| `MCP_TRANSPORT` | Transport mode (http/stdio) | `http`                          |
+| `MCP_PORT`      | HTTP server port            | `3100`                          |
+| `LAB_URL`       | Lab backend URL             | `http://localhost:4100`         |
+| `PRICING_URL`   | Pricing service URL         | `http://localhost:4002`         |
+| `PLATFORM_URL`  | Platform gateway URL        | `http://localhost:4000`         |
+| `API_KEY`       | Backend authentication key  | —                               |
+| `CORS_ORIGIN`   | Allowed CORS origin         | `https://alpha.happykokoro.com` |
 
 ## Tier-Based Access Control
 
