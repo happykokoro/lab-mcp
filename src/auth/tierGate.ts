@@ -1,12 +1,13 @@
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 
-export type Tier = "free" | "level1" | "level2" | "promax";
+export type Tier = "free" | "level1" | "level2" | "dev_beta" | "pro_max";
 
 const TIER_LEVELS: Record<Tier, number> = {
   free: 0,
   level1: 1,
   level2: 2,
-  promax: 3,
+  dev_beta: 2,
+  pro_max: 3,
 };
 
 export function tierLevel(tier: string): number {

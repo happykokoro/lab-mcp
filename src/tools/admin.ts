@@ -10,7 +10,7 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
     "admin_list_users",
     "List all users with their tier level and usage statistics (ProMax admin only)",
     {},
-    tierGatedTool("promax", async () => ({
+    tierGatedTool("pro_max", async () => ({
       content: [{ type: "text", text: await client.listUsers() }],
     })),
   );
@@ -21,10 +21,12 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
     {
       user_id: z.string().describe("User ID to modify"),
       tier: z
-        .enum(["free", "level1", "level2", "promax"])
-        .describe("New tier: 'free', 'level1', 'level2', or 'promax'"),
+        .enum(["free", "level1", "level2", "dev_beta", "pro_max"])
+        .describe(
+          "New tier: 'free', 'level1', 'level2', 'dev_beta', or 'pro_max'",
+        ),
     },
-    tierGatedTool("promax", async ({ user_id, tier }) => ({
+    tierGatedTool("pro_max", async ({ user_id, tier }) => ({
       content: [
         {
           type: "text",
@@ -38,7 +40,7 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
     "admin_list_all_bots",
     "List all bots across all users with owner, state, and resource usage (ProMax admin only)",
     {},
-    tierGatedTool("promax", async () => ({
+    tierGatedTool("pro_max", async () => ({
       content: [{ type: "text", text: await client.listAllBots() }],
     })),
   );
@@ -49,7 +51,7 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
     {
       bot_id: z.string().describe("Bot ID to force-stop"),
     },
-    tierGatedTool("promax", async ({ bot_id }) => ({
+    tierGatedTool("pro_max", async ({ bot_id }) => ({
       content: [{ type: "text", text: await client.killBot(bot_id as string) }],
     })),
   );
@@ -58,7 +60,7 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
     "admin_system_health",
     "System health dashboard — services, queues, resource utilization (ProMax admin only)",
     {},
-    tierGatedTool("promax", async () => ({
+    tierGatedTool("pro_max", async () => ({
       content: [{ type: "text", text: await client.getSystemHealth() }],
     })),
   );
@@ -72,7 +74,7 @@ export function registerAdminTools(server: McpServer, platformUrl: string) {
         .optional()
         .describe("Maximum number of log entries to return (default: 50)"),
     },
-    tierGatedTool("promax", async ({ limit }) => ({
+    tierGatedTool("pro_max", async ({ limit }) => ({
       content: [
         { type: "text", text: await client.getAuditLog(limit as number) },
       ],
