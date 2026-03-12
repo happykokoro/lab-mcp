@@ -178,4 +178,48 @@ export function registerLabResources(server: McpServer, reg: ServiceRegistry) {
       return { contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(data, null, 2) }] };
     },
   );
+
+  // ── External data resource templates ────────────────────────────────
+
+  server.registerResource(
+    "market-fundamentals",
+    new ResourceTemplate("lab://market/{token_id}/fundamentals", { list: undefined }),
+    { description: "Token fundamentals from CoinGecko: price, market cap, volume, supply, price changes" },
+    async (uri, variables) => {
+      const tokenId = String(variables.token_id);
+      const data = await reg.coingecko.getTokenInfo(tokenId);
+      return { contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(data, null, 2) }] };
+    },
+  );
+
+  server.registerResource(
+    "market-tvl",
+    new ResourceTemplate("lab://market/{protocol}/tvl", { list: undefined }),
+    { description: "Protocol TVL from DeFi Llama: total TVL, chain breakdown, recent history" },
+    async (uri, variables) => {
+      const protocol = String(variables.protocol);
+      const data = await reg.defillama.getProtocolTvl(protocol);
+      return { contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(data, null, 2) }] };
+    },
+  );
+
+  server.registerResource(
+    "market-traders",
+    new ResourceTemplate("lab://market/{address}/traders", { list: undefined }),
+    { description: "On-chain trader statistics from Birdeye: trade count, buy/sell, unique wallets" },
+    async (uri, variables) => {
+      const address = String(variables.address);
+      if (!reg.birdeye) {
+        return {
+          contents: [{
+            uri: uri.href,
+            mimeType: "application/json",
+            text: JSON.stringify({ error: "Birdeye not configured. Set BIRDEYE_API_KEY." }),
+          }],
+        };
+      }
+      const data = await reg.birdeye.getTraderStats(address);
+      return { contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(data, null, 2) }] };
+    },
+  );
 }

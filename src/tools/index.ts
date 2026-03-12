@@ -13,6 +13,9 @@ import { registerMarketTools } from "./market.js";
 import { registerEventTools } from "./events.js";
 import { registerEngineTools } from "./engine.js";
 import { registerAdminTools } from "./admin.js";
+import { registerFundamentalTools } from "./fundamental.js";
+import { registerRebalanceTools } from "./rebalance.js";
+import { registerAttributionTools } from "./attribution.js";
 
 export function registerAllTools(server: McpServer, registry: ServiceRegistry): void {
   // Lab tools (direct)
@@ -27,6 +30,13 @@ export function registerAllTools(server: McpServer, registry: ServiceRegistry): 
   registerBacktestTools(server, registry);
   registerMarketTools(server, registry);
   registerEventTools(server, registry);
+
+  // Rebalance + attribution tools (client-side computation)
+  registerRebalanceTools(server, registry);
+  registerAttributionTools(server, registry);
+
+  // External data connector tools
+  registerFundamentalTools(server, registry);
 
   // Platform tools (auth required)
   registerEngineTools(server, registry);

@@ -1,0 +1,34 @@
+{
+  "dataSources": {
+    "coingecko": {
+      "type": "http",
+      "baseUrl": "https://api.coingecko.com/api/v3",
+      "auth": "optional-api-key",
+      "description": "Token fundamentals, market data, price history",
+      "envVars": ["COINGECKO_API_KEY"],
+      "docs": "https://docs.coingecko.com/v3.0.1/reference/introduction"
+    },
+    "defillama": {
+      "type": "http",
+      "baseUrl": "https://api.llama.fi",
+      "auth": "none",
+      "description": "Protocol TVL, chain TVL, DeFi yields",
+      "docs": "https://defillama.com/docs/api"
+    },
+    "birdeye": {
+      "type": "http",
+      "baseUrl": "https://public-api.birdeye.so",
+      "auth": "required-api-key",
+      "description": "Solana token prices, OHLCV, trader statistics",
+      "envVars": ["BIRDEYE_API_KEY"],
+      "docs": "https://docs.birdeye.so"
+    },
+    "jupiter": {
+      "type": "http",
+      "baseUrl": "https://api.jup.ag",
+      "auth": "none",
+      "description": "DEX aggregator quotes, price impact, routing",
+      "docs": "https://station.jup.ag/docs/apis"
+    }
+  }
+}

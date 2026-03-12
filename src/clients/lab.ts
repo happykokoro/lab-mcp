@@ -12,6 +12,7 @@ import type {
   CorrelationMatrix, DecisionTrace, EventRecord,
   ExecutionConfig, ExecutionHistory, MicrostructureState,
   BacktestResult, ScenarioInfo, OHLCVCandle, EquityPoint,
+  DriftAnalysis, TradePlan,
 } from "../types/lab.js";
 
 /** Typed client for all 32 Lab REST endpoints (port 4100). */
@@ -181,5 +182,19 @@ export class LabClient extends BaseClient {
 
   getConvergenceHistory(): Promise<ConvergenceHistoryResponse> {
     return this.get("/api/diagnostics/convergence-history");
+  }
+
+  // ── Rebalance (future Lab endpoints) ────────────────────────────
+
+  getDrift(): Promise<DriftAnalysis> {
+    return this.get("/api/rebalance/drift");
+  }
+
+  getRebalancePlan(): Promise<TradePlan> {
+    return this.post("/api/rebalance/plan");
+  }
+
+  getAllocationTargets(): Promise<{ config: Record<string, unknown> }> {
+    return this.get("/api/rebalance/targets");
   }
 }

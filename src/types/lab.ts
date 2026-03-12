@@ -245,3 +245,61 @@ export interface ScenarioInfo {
   description: string;
   steps: number;
 }
+
+// ── Rebalance Types ──────────────────────────────────────────────
+
+export interface DriftEntry {
+  token_mint: string;
+  token_symbol: string | null;
+  target_pct: number;
+  current_pct: number;
+  drift_pct: number;
+  sol_over_under: number;
+  exceeds_band: boolean;
+}
+
+export interface DriftAnalysis {
+  entries: DriftEntry[];
+  total_portfolio_sol: number;
+  max_drift_pct: number;
+  mean_drift_pct: number;
+  needs_rebalance: boolean;
+  timestamp: number;
+}
+
+export interface RebalanceTrade {
+  token_mint: string;
+  token_symbol: string | null;
+  action: "Buy" | "Sell";
+  amount_sol: number;
+  estimated_slippage_bps: number;
+  reason: string;
+}
+
+export interface TradePlan {
+  trades: RebalanceTrade[];
+  total_slippage_cost_sol: number;
+  drift_before: number;
+  drift_after_estimate: number;
+  skipped_reason: string | null;
+}
+
+// ── Attribution Types ────────────────────────────────────────────
+
+export interface FactorAttribution {
+  name: string;
+  signals_contributed: number;
+  total_pnl: number;
+  avg_pnl_per_signal: number;
+  win_rate: number;
+}
+
+// ── Parameter Sweep Types ────────────────────────────────────────
+
+export interface ParameterSweepResult {
+  value: number;
+  total_pnl: number;
+  win_rate: number;
+  max_drawdown: number;
+  total_trades: number;
+}
