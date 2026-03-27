@@ -305,6 +305,261 @@ export function registerQuantTools(server: McpServer, labUrl: string) {
     })),
   );
 
+  // ── GARCH Estimation ───────────────────────────────────────
+
+  server.tool(
+    "lab_quant_garch",
+    "Fit GARCH(1,1) model to return series. Returns omega, alpha, beta parameters and multi-step volatility forecast.",
+    {
+      returns: z
+        .array(z.number())
+        .describe("Array of log returns to fit GARCH model"),
+      forecast_steps: z
+        .number()
+        .min(1)
+        .max(252)
+        .optional()
+        .describe("Number of steps to forecast volatility (default: 10)"),
+    },
+    tierGatedTool("level1", async ({ returns, forecast_steps }) => {
+      const body: Record<string, unknown> = { returns };
+      if (forecast_steps !== undefined) body.forecast_steps = forecast_steps;
+      return {
+        content: [
+          {
+            type: "text",
+            text: await quantFetchWithBody(
+              labUrl,
+              "/api/quant/garch",
+              "POST",
+              body,
+            ),
+          },
+        ],
+      };
+    }),
+  );
+
+  // ── Hurst Exponent ────────────────────────────────────────
+
+  server.tool(
+    "lab_quant_hurst",
+    "Estimate Hurst exponent via R/S analysis. H<0.5 = mean-reverting, H=0.5 = random walk, H>0.5 = trending.",
+    {
+      data: z.array(z.number()).describe("Time series data points"),
+    },
+    tierGatedTool("level1", async ({ data }) => ({
+      content: [
+        {
+          type: "text",
+          text: await quantFetchWithBody(labUrl, "/api/quant/hurst", "POST", {
+            data,
+          }),
+        },
+      ],
+    })),
+  );
+
+  // ── EWMA ──────────────────────────────────────────────────
+
+  server.tool(
+    "lab_quant_ewma",
+    "Compute Exponentially Weighted Moving Average on a time series.",
+    {
+      data: z.array(z.number()).describe("Time series data points"),
+      span: z
+        .number()
+        .min(2)
+        .max(1000)
+        .optional()
+        .describe("EWMA span / lookback window (default: 20)"),
+    },
+    tierGatedTool("level1", async ({ data, span }) => {
+      const body: Record<string, unknown> = { data };
+      if (span !== undefined) body.span = span;
+      return {
+        content: [
+          {
+            type: "text",
+            text: await quantFetchWithBody(
+              labUrl,
+              "/api/quant/ewma",
+              "POST",
+              body,
+            ),
+          },
+        ],
+      };
+    }),
+  );
+
+  // ── Jump Detection ────────────────────────────────────────
+
+  server.tool(
+    "lab_quant_jump_detection",
+    "Detect jumps/discontinuities in a price series using statistical methods.",
+    {
+      prices: z.array(z.number()).describe("Price series to analyze"),
+      threshold: z
+        .number()
+        .positive()
+        .optional()
+        .describe("Z-score threshold for jump detection (default: 3.0)"),
+    },
+    tierGatedTool("level1", async ({ prices, threshold }) => {
+      const body: Record<string, unknown> = { prices };
+      if (threshold !== undefined) body.threshold = threshold;
+      return {
+        content: [
+          {
+            type: "text",
+            text: await quantFetchWithBody(
+              labUrl,
+              "/api/quant/jump-detection",
+              "POST",
+              body,
+            ),
+          },
+        ],
+      };
+    }),
+  );
+
+  // ── Autocorrelation ───────────────────────────────────────
+
+  server.tool(
+    "lab_quant_autocorrelation",
+    "Compute autocorrelation function (ACF) for a time series at multiple lags.",
+    {
+      data: z.array(z.number()).describe("Time series data points"),
+      max_lag: z
+        .number()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Maximum lag to compute (default: 20)"),
+    },
+    tierGatedTool("level1", async ({ data, max_lag }) => {
+      const body: Record<string, unknown> = { data };
+      if (max_lag !== undefined) body.max_lag = max_lag;
+      return {
+        content: [
+          {
+            type: "text",
+            text: await quantFetchWithBody(
+              labUrl,
+              "/api/quant/autocorrelation",
+              "POST",
+              body,
+            ),
+          },
+        ],
+      };
+    }),
+  );
+
+  // ── ADF Test ──────────────────────────────────────────────
+
+  server.tool(
+    "lab_quant_adf",
+    "Run Augmented Dickey-Fuller test for stationarity. Returns test statistic, p-value, and critical values.",
+    {
+      data: z.array(z.number()).describe("Time series data to test"),
+      max_lags: z
+        .number()
+        .min(0)
+        .max(50)
+        .optional()
+        .describe("Maximum number of lags to include (default: auto)"),
+    },
+    tierGatedTool("level1", async ({ data, max_lags }) => {
+      const body: Record<string, unknown> = { data };
+      if (max_lags !== undefined) body.max_lags = max_lags;
+      return {
+        content: [
+          {
+            type: "text",
+            text: await quantFetchWithBody(
+              labUrl,
+              "/api/quant/adf",
+              "POST",
+              body,
+            ),
+          },
+        ],
+      };
+    }),
+  );
+
+  // ── K-Means Clustering ────────────────────────────────────
+
+  server.tool(
+    "lab_quant_kmeans",
+    "Run k-means clustering on multi-dimensional data. Returns cluster assignments and centroids.",
+    {
+      data: z
+        .array(z.array(z.number()))
+        .describe("Data points as array of feature vectors"),
+      k: z.number().min(2).max(20).describe("Number of clusters"),
+      max_iter: z
+        .number()
+        .min(1)
+        .max(1000)
+        .optional()
+        .describe("Maximum iterations (default: 100)"),
+    },
+    tierGatedTool("level1", async ({ data, k, max_iter }) => {
+      const body: Record<string, unknown> = { data, k };
+      if (max_iter !== undefined) body.max_iter = max_iter;
+      return {
+        content: [
+          {
+            type: "text",
+            text: await quantFetchWithBody(
+              labUrl,
+              "/api/quant/kmeans",
+              "POST",
+              body,
+            ),
+          },
+        ],
+      };
+    }),
+  );
+
+  // ── Feature Extraction ────────────────────────────────────
+
+  server.tool(
+    "lab_quant_features",
+    "Extract statistical features from a time series: mean, std, skew, kurtosis, min, max, autocorrelation.",
+    {
+      data: z.array(z.number()).describe("Time series data points"),
+      window: z
+        .number()
+        .min(5)
+        .max(500)
+        .optional()
+        .describe("Rolling window size for feature computation (default: 20)"),
+    },
+    tierGatedTool("level1", async ({ data, window }) => {
+      const body: Record<string, unknown> = { data };
+      if (window !== undefined) body.window = window;
+      return {
+        content: [
+          {
+            type: "text",
+            text: await quantFetchWithBody(
+              labUrl,
+              "/api/quant/features",
+              "POST",
+              body,
+            ),
+          },
+        ],
+      };
+    }),
+  );
+
   // ── Efficient Frontier ────────────────────────────────────
 
   server.tool(
