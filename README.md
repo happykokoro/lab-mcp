@@ -102,11 +102,13 @@ Claude Code / MCP Client
 
 ## Related Repositories
 
-Part of the **Kokoro Alpha Lab** 5-repo ecosystem:
+Part of the **Kokoro Alpha Lab** 7-repo ecosystem:
 
 | Repo                                                                                  | Purpose                                   |
 | ------------------------------------------------------------------------------------- | ----------------------------------------- |
 | [kokoro-alpha-lab](https://github.com/happykokoro/kokoro-alpha-lab)                   | Core: shared types, Lab, Engine, Platform |
 | [kokoro-alpha-lab-frontend](https://github.com/happykokoro/kokoro-alpha-lab-frontend) | Next.js dashboard                         |
 | [kokoro-wallet-monitor](https://github.com/happykokoro/kokoro-wallet-monitor)         | Solana swap detection                     |
+| [kokoro-polymarket-bot](https://github.com/happykokoro/kokoro-polymarket-bot)         | Polymarket trading bot (port 4300)        |
+| [kokoro-liquidation-bot](https://github.com/happykokoro/kokoro-liquidation-bot)       | DeFi liquidation bot (port 4400)          |
 | [kokoro-pricing-service](https://github.com/happykokoro/kokoro-pricing-service)       | Multi-DEX price aggregation               |
