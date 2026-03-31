@@ -12,11 +12,13 @@ import { registerTradfiTools } from "./tools/tradfi.js";
 import { registerUniverseTools } from "./tools/universe.js";
 import { registerConsensusTools } from "./tools/consensus.js";
 import { registerQuantTools } from "./tools/quant-tools.js";
+import { registerTerminalTools } from "./tools/terminal.js";
 
 export interface ServerUrls {
   labUrl: string;
   pricingUrl: string;
   platformUrl: string;
+  terminalUrl: string;
 }
 
 export function createMcpServer(urls: ServerUrls): McpServer {
@@ -38,6 +40,7 @@ export function createMcpServer(urls: ServerUrls): McpServer {
   registerUniverseTools(server, urls.labUrl);
   registerConsensusTools(server, urls.labUrl);
   registerQuantTools(server, urls.labUrl);
+  registerTerminalTools(server, urls.terminalUrl);
 
   return server;
 }
