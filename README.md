@@ -1,6 +1,10 @@
 # Lab MCP
 
-MCP (Model Context Protocol) server for the Kokoro Alpha Lab trading system. Exposes 98 tools for AI-native interaction with the Lab, Engine, and Platform services via Claude Code or any MCP-compatible client.
+**Version**: v1.1.0
+
+MCP (Model Context Protocol) server for the Kokoro Alpha Lab trading system. Exposes 98+ tools for AI-native interaction with the Lab, Engine, and Platform services via Claude Code or any MCP-compatible client.
+
+**Deployment**: 167.172.70.15:3100 (DigitalOcean) — Docker
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
 ![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-blue?style=flat)
