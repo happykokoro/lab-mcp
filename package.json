@@ -12,7 +12,7 @@
     "dev": "npm run build && npm run start"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "zod": "^3.24"
   },
   "devDependencies": {
